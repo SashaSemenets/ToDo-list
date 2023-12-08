@@ -19,3 +19,11 @@
     }
   }
 }
+
+::ng-deep {
+  .mat-expansion-panel-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}

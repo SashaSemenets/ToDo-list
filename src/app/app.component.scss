@@ -41,3 +41,57 @@
 .g-10 {
   gap: 10px;
 }
+
+.multi-progress-container {
+  display: flex;
+  flex-direction: column;
+  height: 10px;
+  width: 100%;
+  flex-wrap: wrap;
+
+  .progress-bar {
+    ::ng-deep {
+      .mat-progress-bar-background {
+        display: none;
+      }
+
+      .mat-progress-bar-buffer {
+        display: none;
+      }
+    }
+
+    &.inprogress {
+      ::ng-deep {
+        .mat-progress-bar-fill {
+          &::after {
+            background-color: yellow;
+          }
+        }
+      }
+    }
+
+    &.warn {
+      ::ng-deep {
+        .mat-progress-bar-fill {
+          &::after {
+            background-color: red;
+          }
+        }
+      }
+    }
+
+    &.complete {
+      ::ng-deep {
+        .mat-progress-bar-fill {
+          &::after {
+            background-color: green;
+          }
+        }
+      }
+    }
+  }
+}
+
+.mat-progress-bar {
+  height: 100%;
+}

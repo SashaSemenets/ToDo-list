@@ -1,9 +1,10 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { ListService } from './services/list.service';
 import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, map, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, takeUntil, tap } from 'rxjs/operators';
 import { Type } from '@models/type.enum';
 import { FormControl } from '@angular/forms';
+import { ProgressBarSection } from '@models/progress-bar';
 
 const DEBOUNCE_MS = 500;
 
@@ -20,6 +21,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this.filterSubject$,
   ])
     .pipe(
+      tap(([list, searchTerm]) => this._setProgressbar(list)),
       map(([list, searchTerm]) =>
         !!Object.values(list).flat().length
         ? list.filter((item: any) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -31,6 +33,11 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   public readonly Type: typeof Type = Type;
   filterInput: FormControl = new FormControl('');
+  sections: ProgressBarSection[] = [
+    { value: 0, customClass: 'inprogress', type: Type.Inprogress },
+    { value: 0, customClass: 'warn', type: Type.Postponed  },
+    { value: 0, customClass: 'complete', type: Type.Complete  },
+  ];
 
   constructor (private readonly _listService: ListService) {}
 
@@ -56,6 +63,54 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public onReset(): void {
     this._listService.onReset();
+  }
+
+  private _setProgressbar(list: any[]): void {
+    const allTasks = list.length;
+    const perTask = 100 / allTasks;
+    const groupingTasks = !!Object.values(list).flat().length ? this._listService.groupBy(list, 'type') : null;
+
+    if (!!groupingTasks) {
+      if (!!groupingTasks[Type.Inprogress]?.length) {
+        this._updateProgressbarSection(Type.Inprogress, perTask, groupingTasks[Type.Inprogress].length, 'inprogress');
+      } else {
+        this._clearProgressbarSection(Type.Inprogress, 'inprogress');
+      }
+
+      if (!!groupingTasks[Type.Postponed]?.length) {
+        this._updateProgressbarSection(Type.Postponed, perTask, groupingTasks[Type.Postponed].length, 'warn');
+      } else {
+        this._clearProgressbarSection(Type.Postponed, 'warn');
+      }
+
+      if (!!groupingTasks[Type.Complete]?.length) {
+        this._updateProgressbarSection(Type.Complete, perTask, groupingTasks[Type.Complete].length, 'complete');
+      } else {
+        this._clearProgressbarSection(Type.Complete, 'complete');
+      }
+    }
+  }
+
+  private _updateProgressbarSection(sectionType: Type, perTask: number, arrLen: number, customClass: string): void {
+    const index = this.sections.findIndex(({ type }) => type === sectionType);
+    const newRow: ProgressBarSection = {
+      value: perTask * arrLen,
+      customClass: customClass,
+      type: sectionType,
+    };
+
+    this.sections[index] = newRow;
+  }
+
+  private _clearProgressbarSection(sectionType: Type, customClass: string): void {
+    const index = this.sections.findIndex(({ type }) => type === sectionType);
+    const newRow = {
+      value: 0,
+      customClass: customClass,
+      type: sectionType,
+    };
+
+    this.sections[index] = newRow;
   }
 
   ngOnDestroy(): void {

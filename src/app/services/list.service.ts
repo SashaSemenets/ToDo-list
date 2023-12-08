@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { catchError, filter, map, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { Type } from '@models/type.enum';
 
 @Injectable({
@@ -35,53 +35,29 @@ export class ListService {
 
   public deleteItem(id: number, type: Type): void {
     const list = this.list$.getValue();
-    const listByType = list[type];
-    const formattedList = listByType.filter((item: any) => item.id !== id);
+    const formattedList = list.filter((item: any) => item.id !== id);
 
-    this.list$.next({
-      ...list,
-      [type]: formattedList,
-    });
+    this.list$.next(formattedList);
   }
 
   public onPropose(id: number, type: Type): void {
     const list = this.list$.getValue();
-    const listByType = list[type];
-    const postponedList = list[Type.Postponed] || [];
-    const selectedItem = listByType.find((item: any) => item.id === id);
-    const formattedList = listByType.filter((item: any) => item.id !== id);
 
-    this.list$.next({
-      ...list,
-      [type]: formattedList,
-      [Type.Postponed]: [
-        ...postponedList,
-        {
-          ...selectedItem,
-          type: Type.Postponed,
-        },
-      ]
+    list.map((item: any) => {
+      if (item.id === id) item.type = Type.Postponed;
+      return item;
     });
+    this.list$.next(list);
   }
 
   public onComplete(id: number, type: Type): void {
     const list = this.list$.getValue();
-    const listByType = list[type];
-    const completeList = list[Type.Complete] || [];
-    const selectedItem = listByType.find((item: any) => item.id === id);
-    const formattedList = listByType.filter((item: any) => item.id !== id);
 
-    this.list$.next({
-      ...list,
-      [type]: formattedList,
-      [Type.Complete]: [
-        ...completeList,
-        {
-          ...selectedItem,
-          type: Type.Complete,
-        },
-      ]
+    list.map((item: any) => {
+      if (item.id === id) item.type = Type.Complete;
+      return item;
     });
+    this.list$.next(list);
   }
 
   public onReset(): void {
@@ -94,14 +70,8 @@ export class ListService {
     const lastItem = listArr[listArr.length - 1];
     const { id: lastItemId } = lastItem;
     const newItem = { id: lastItemId+1, name, type: Type.Inprogress };
-    const inProgressList = list[Type.Inprogress] || [];
 
-    this.list$.next({
-      ...list,
-      [Type.Inprogress]: [
-        ...inProgressList,
-        newItem,
-      ]
-    });
+    list.push(newItem);
+    this.list$.next(list);
   }
 }

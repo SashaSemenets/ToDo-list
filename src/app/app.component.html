@@ -4,7 +4,15 @@
   </section>
 
   <section class="d-flex">
-    <mat-progress-bar mode="determinate" value="40"></mat-progress-bar>
+    <div class="multi-progress-container">
+      <mat-progress-bar
+        *ngFor="let section of sections"
+        [value]="100"
+        class="progress-bar"
+        [style.width.%]="section.value"
+        [ngClass]="section.customClass"
+      ></mat-progress-bar>
+    </div>
   </section>
 
   <section class="d-flex">
