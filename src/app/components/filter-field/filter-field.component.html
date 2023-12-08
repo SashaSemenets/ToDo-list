@@ -1,0 +1,6 @@
+<mat-form-field appearance="outline" class="w-100">
+  <input matInput placeholder="Filter items" [formControl]="filterControl">
+  <button mat-icon-button aria-label="Add item" (click)="reset()">
+    <mat-icon *ngIf="!isHidden">close</mat-icon>
+  </button>
+</mat-form-field>

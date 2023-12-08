@@ -1,0 +1,18 @@
+<mat-card>
+  <mat-card-content class="d-flex align-items-center w-100 justify-content-between">
+    {{ item.name }}
+    <div class="card-actions d-flex">
+      <button mat-icon-button aria-label="delete item" class="btn delete" *ngIf="type !== Type.Complete" (click)="onDelete(item.id)">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <button mat-icon-button aria-label="pause item" class="btn warn" *ngIf="type === Type.Inprogress" (click)="onPropose(item.id)">
+        <mat-icon>pause</mat-icon>
+      </button>
+
+      <button mat-icon-button aria-label="done item" class="btn done" *ngIf="type !== Type.Complete" (click)="onComplete(item.id)">
+        <mat-icon>done</mat-icon>
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>

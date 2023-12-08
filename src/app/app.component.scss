@@ -1,0 +1,43 @@
+.add-field {
+  ::ng-deep {
+    .mat-form-field-appearance-outline {
+      .mat-form-field-wrapper {
+        padding: 0;
+
+        .mat-form-field-flex {
+          margin: 0;
+
+          .mat-form-field-infix {
+            display: flex;
+            border-top: 0;
+            padding: 0.5em 0 0.5em 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.list-accordion {
+  background: transparent;
+  box-shadow: none;
+
+  ::ng-deep {
+    .mat-expansion-panel-header {
+      flex-direction: row-reverse;
+      padding: 0 0.5em;
+
+      .mat-expansion-indicator {
+        display: flex;
+      }
+    }
+
+    .mat-expansion-panel-body {
+      padding: 0;
+    }
+  }
+}
+
+.g-10 {
+  gap: 10px;
+}
