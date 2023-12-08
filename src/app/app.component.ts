@@ -5,6 +5,7 @@ import { debounceTime, distinctUntilChanged, map, takeUntil, tap } from 'rxjs/op
 import { Type } from '@models/type.enum';
 import { FormControl } from '@angular/forms';
 import { ProgressBarSection } from '@models/progress-bar';
+import { ListItem } from '@models/list-item';
 
 const DEBOUNCE_MS = 500;
 
@@ -21,13 +22,13 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this.filterSubject$,
   ])
     .pipe(
-      tap(([list, searchTerm]) => this._setProgressbar(list)),
+      tap(([list]) => this._setProgressbar(list)),
       map(([list, searchTerm]) =>
         !!Object.values(list).flat().length
-        ? list.filter((item: any) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        ? list.filter((item: ListItem) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
         : list
       ),
-      map((list: any) =>
+      map((list: ListItem[]) =>
         !!Object.values(list).flat().length ? this._listService.groupBy(list, 'type') : list
       ),
     );
@@ -52,7 +53,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
         distinctUntilChanged(),
         takeUntil(this._unsub),
       )
-      .subscribe(res => this.filterSubject$.next(res));
+      .subscribe((res: string) => this.filterSubject$.next(res));
   }
 
   private _getData(): void {
@@ -65,7 +66,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
     this._listService.onReset();
   }
 
-  private _setProgressbar(list: any[]): void {
+  private _setProgressbar(list: ListItem[]): void {
     const allTasks = list.length;
     const perTask = 100 / allTasks;
     const groupingTasks = !!Object.values(list).flat().length ? this._listService.groupBy(list, 'type') : null;
@@ -88,6 +89,10 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         this._clearProgressbarSection(Type.Complete, 'complete');
       }
+    } else {
+      this._clearProgressbarSection(Type.Inprogress, 'inprogress');
+      this._clearProgressbarSection(Type.Postponed, 'warn');
+      this._clearProgressbarSection(Type.Complete, 'complete');
     }
   }
 

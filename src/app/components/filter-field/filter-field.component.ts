@@ -15,7 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
   ],
 })
 export class FilterFieldComponent implements ControlValueAccessor, OnInit, OnDestroy {
-  @Input() value: any = '';
+  @Input() value: string = '';
 
   filterControl: FormControl = new FormControl('');
   public readonly destroy$ = new Subject<void>();
@@ -35,7 +35,7 @@ export class FilterFieldComponent implements ControlValueAccessor, OnInit, OnDes
       });
   }
 
-  writeValue(value: any) {
+  writeValue(value: string) {
     if (value !== undefined) {
       this.value = value;
     }

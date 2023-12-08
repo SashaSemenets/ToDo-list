@@ -3,25 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Type } from '@models/type.enum';
+import { ListItem } from '@models/list-item';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ListService {
   private dataUrl = 'api/data';
-  private initialValue = {
-    [Type.Inprogress]: [],
-    [Type.Postponed]: [],
-    [Type.Complete]: [],
-  };
-  public list$: BehaviorSubject<any> = new BehaviorSubject(this.initialValue);
+  public list$: BehaviorSubject<ListItem[]> = new BehaviorSubject<ListItem[]>([]);
   public readonly Type: typeof Type = Type;
 
   constructor(private http: HttpClient) { }
 
-  public getData(): Observable<any> {
-    return this.http.get(this.dataUrl)
-      .pipe(tap((res: any) => this.list$.next(res)));
+  public getData(): Observable<ListItem[]> {
+    return this.http.get<ListItem[]>(this.dataUrl)
+      .pipe(tap((res: ListItem[]) => this.list$.next(res)));
   }
 
   public groupBy(array: any[], key: string) {
@@ -35,7 +31,7 @@ export class ListService {
 
   public deleteItem(id: number, type: Type): void {
     const list = this.list$.getValue();
-    const formattedList = list.filter((item: any) => item.id !== id);
+    const formattedList = list.filter((item: ListItem) => item.id !== id);
 
     this.list$.next(formattedList);
   }
@@ -43,7 +39,7 @@ export class ListService {
   public onPropose(id: number, type: Type): void {
     const list = this.list$.getValue();
 
-    list.map((item: any) => {
+    list.map((item: ListItem) => {
       if (item.id === id) item.type = Type.Postponed;
       return item;
     });
@@ -53,7 +49,7 @@ export class ListService {
   public onComplete(id: number, type: Type): void {
     const list = this.list$.getValue();
 
-    list.map((item: any) => {
+    list.map((item: ListItem) => {
       if (item.id === id) item.type = Type.Complete;
       return item;
     });
@@ -61,12 +57,12 @@ export class ListService {
   }
 
   public onReset(): void {
-    this.list$.next(this.initialValue);
+    this.list$.next([]);
   }
 
   public addItem(name: string): void {
     const list = this.list$.getValue();
-    const listArr: any = Object.values(list).flat().sort((a: any, b: any) => a.id - b.id);
+    const listArr: ListItem[] = Object.values(list).flat().sort((a: ListItem, b: ListItem) => a.id - b.id);
     const lastItem = listArr[listArr.length - 1];
     const { id: lastItemId } = lastItem;
     const newItem = { id: lastItemId+1, name, type: Type.Inprogress };
